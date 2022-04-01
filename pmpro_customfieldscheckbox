@@ -1,0 +1,154 @@
+add_action( 'init', 'pmpro_register_helper_add_upload_fields' );
+
+
+     //don't break if Register Helper is not loaded
+     if(!function_exists( 'pmprorh_add_registration_field' )) {
+         return false;
+     }
+	$fields[] = new PMProRH_Field(
+		'vehicle',							// input name, will also be used as meta key
+		'text',								// type of field
+		array(
+			'label'		=> 'Year, Make, Model of Your Rig? No Rig yet? Put N/A',		// custom field label
+			'size'		=> 100,				// input size
+			'class'		=> 'vehicle',		// custom class
+			'profile'	=> true,			// show in user profile
+			'required'	=> true,			// make this field required
+			'levels'		=> array(1,2,3,4)	// only levels 1 and 2 should have the company field
+		)
+	);
+	$fields[] = new PMProRH_Field(
+		'image-one',
+		'file',
+		array(
+			'label'    => 'Upload 1-3 photos of your rig!',
+			'class'    => 'user',
+			'profile'  => true,
+			'required' => false,
+			'addmember' => true,
+			'allow_delete' => true,
+			'levels'		=> array(2,3,4,)
+		)
+	);
+	$fields[] = new PMProRH_Field(
+		'image-two',
+		'file',
+		array(
+			'label'    => ' ',
+			'class'    => 'user',
+			'profile'  => true,
+			'required' => false,
+			'addmember' => true,
+			'allow_delete' => true,
+			'levels'		=> array(2,3,4,)
+		)
+	);
+	$fields[] = new PMProRH_Field(
+		'image-three',
+		'file',
+		array(
+			'label'    => ' ',
+			'class'    => 'user',
+			'profile'  => true,
+			'required' => false,
+			'addmember' => true,
+			'allow_delete' => true,
+			'levels'		=> array(2,3,4,)
+		)
+	);
+	$fields[] = new PMProRH_Field(
+         'addon_options', // input field name, used as meta key
+         'checkbox_grouped',         // field type
+         array(
+             'label'          => 'Pick your T-shirt Size!',
+             'options'        => array(      // display the different options, no need for a "blank" option
+                 'Small' => 'Small',
+                 'Medium' => 'Medium',
+				 'Large' => 'Large',
+				 'XLarge' => 'X-Large',
+				 'XXLarge' => 'XX-Large',
+             ),
+             'profile'        => true,
+             'required'       => true,
+			 'levels'		=> array(2,3,4,)	// only levels 1 and 2 should have the company field
+         )
+     );
+	$fields[] = new PMProRH_Field(
+         'addon_options', // input field name, used as meta key
+         'checkbox_grouped',         // field type
+         array(
+             'label'          => 'Pick your Sweatshirt Size!',
+             'options'        => array(      // display the different options, no need for a "blank" option
+                 'Small' => 'Small',
+                 'Medium' => 'Medium',
+				 'Large' => 'Large',
+				 'XLarge' => 'X-Large',
+				 'XXLarge' => 'XX-Large',
+             ),
+             'profile'        => true,
+             'required'       => true,
+			 'levels'		=> array(3,4)	// only levels 1 and 2 should have the company field
+         )
+     );
+	
+     //add the fields into a new checkout_boxes are of the checkout page
+     foreach($fields as $field)
+         pmprorh_add_registration_field(
+             'checkout_boxes',			// location on checkout page
+             $field						// PMProRH_Field object
+         );
+	
+     //that's it. see the PMPro Register Helper readme for more information and examples.
+
+function my_pmprorh_init()
+ {
+     //don't break if Register Helper is not loaded
+     if(!function_exists( 'pmprorh_add_registration_field' )) {
+         return false;
+     }
+     $fields[] = new PMProRH_Field(
+         'addon_options', // input field name, used as meta key
+         'checkbox_grouped',         // field type
+         array(
+             'label'          => 'Delivery Method for Swag!',
+			 'hint'            => '*Local pickup available at next months meet & greet or contact us to arrange an alternative location!',
+             'options'        => array(      // display the different options, no need for a "blank" option
+                 'Shipped' => 'Please ship my items for $13.95',
+                 'Local' => 'I would like to pick them up locally!',
+             ),
+             'profile'        => true,
+             'memberslistcsv' => true,
+             'required'       => true,
+         )
+     );
+     //add the fields into a new checkout_boxes are of the checkout page
+     foreach($fields as $field)
+         pmprorh_add_registration_field(
+             'checkout_boxes',			// location on checkout page
+             $field						// PMProRH_Field object
+         );
+     //that's it. see the PMPro Register Helper readme for more information and examples.
+ }
+ add_action( 'init', 'my_pmprorh_init' );
+ 
+function my_pmpro_checkout_level($level)
+ {
+$addon_checkboxes = !empty( $_REQUEST['addon_options'] ) ? $_REQUEST['addon_options'] : '';
+if ( ! is_array( $addon_checkboxes ) ) {
+   return $level;
+}
+foreach( $addon_checkboxes as $options ) {
+    switch( $options ) {
+        case "Shipped":
+            $level->initial_payment = $level->initial_payment + 13.95; //to update the initial payment.
+            //$level->billing_amount = $level->billing_amount + 13.95;	//to update recurring payments too
+        break;
+        case "Local":
+            $level->initial_payment = $level->initial_payment + 0; //to update the initial payment.
+         //$level->billing_amount = $level->billing_amount + 0;	//to update recurring payments too
+        break;
+    }
+}
+   return $level;
+ }
+ add_filter( 'pmpro_checkout_level', 'my_pmpro_checkout_level' );
